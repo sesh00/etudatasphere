@@ -1,7 +1,7 @@
 from io import open
 from setuptools import setup
 
-version = '0.1.2'
+version = '0.1.0'
 
 with open('README.md', encoding='utf-8') as f:
     long_description = f.read()
@@ -11,15 +11,16 @@ setup(
     version=version,
 
     author='sesh00',
-    author_email='ernestrsage@gmail.ru',
+    author_email='ernestrsage@gmail.com',
 
     description=(
-        u'Python library for interacting with a Yandex DataProc Queue'
+        u'etudatasphere: Simplifying Cloud Administration. Access Yandex.Cloud services with ease, automating routine '
+        u'tasks for resource management.'
     ),
     long_description=long_description,
     long_description_content_type='text/markdown',
 
-    url='https://github.com/sesh00/etudataproc',
+    url='https://github.com/sesh00/etudatasphere',
     download_url='https://github.com/sesh00/etudatasphere/archive/main.zip'.format(
         version
     ),
