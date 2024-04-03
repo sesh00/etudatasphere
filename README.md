@@ -1,4 +1,4 @@
-# EtuDataSphere
+# EtuDataSphere v1
 
 ![PyPI](https://img.shields.io/pypi/v/etudatasphere?color=orange) ![Python 3.6, 3.7, 3.8](https://img.shields.io/pypi/pyversions/etudatasphere?color=blueviolet) ![GitHub Pull Requests](https://img.shields.io/github/issues-pr/sesh00/etudatasphere?color=blueviolet) ![License](https://img.shields.io/pypi/l/d?color=blueviolet) 
 
