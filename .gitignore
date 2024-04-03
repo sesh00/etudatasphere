@@ -1,3 +1,6 @@
 /.idea/
 /dist/
 /etudataproc.egg-info/
+**venv
+test.ipynb
+**__pycache__
