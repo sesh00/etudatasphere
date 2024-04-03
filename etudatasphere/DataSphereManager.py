@@ -174,7 +174,13 @@ class DataSphereManager():
         ).to_dict()
 
         projects = self.get_projects(community_id=community_id)
-        print(data)
+
+        updateMask_list = []
+        for k,v in data.items():
+            for n in v.keys():
+                updateMask_list.append(f"{k}.{n}")
+        data['updateMask'] = ', '.join(updateMask_list)
+        
         try:
             for idx, project in enumerate(projects['projects']):
                 print(f"{idx+1}/{len(projects['projects'])}")
