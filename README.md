@@ -22,10 +22,10 @@ pip install https://github.com/sesh00/etudatasphere/archive/main.zip
 from etudatasphere import DataSphereManager
 ```
 ### Initializing DataSphereManager
+[oauth token](https://yandex.cloud/ru/docs/iam/concepts/authorization/oauth-token)
 ```python
-iam_token = ""
-# Can be obtained using an OAuth token
-dataSphereManager = DataSphereManager(iam_token)
+oauth_token = ""
+dataSphereManager = DataSphereManager(oauth_token)
 ```
 ### Request for Organizations and Their Identifiers
 Retrieves a list of organizations and their identifiers.
