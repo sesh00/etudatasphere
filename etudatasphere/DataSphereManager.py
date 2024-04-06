@@ -1,14 +1,27 @@
 import requests
-import traceback
 import json
-from etudatasphere.exceptions import BadProjectRequest, BadStatusCode, handle_exceptions
+from etudatasphere.exceptions import BadProjectRequest, BadStatusCode
 from etudatasphere.utils import parse_projects, ProjectSettings
 
 
+def request_iam_token(oauth_token):
+    url = "https://iam.api.cloud.yandex.net/iam/v1/tokens"
+    headers = {"Authorization": f"OAuth {oauth_token}"}
+    payload = {"yandexPassportOauthToken": oauth_token}
 
-class DataSphereManager():
+    res = requests.post(url, headers=headers, json=payload)
 
-    def __init__(self, iam_token: str) -> None:
+    if res.status_code != 200:
+        raise BadStatusCode(res.status_code, res.text)
+    else:
+        response_json = res.json()
+        return response_json.get("iamToken")
+
+
+class DataSphereManager:
+
+    def __init__(self, oauth_token: str) -> None:
+        iam_token = request_iam_token(oauth_token)
         self.HEADERS = {"Authorization": "Bearer {}".format(iam_token)}
 
     def __make_get_request(self, url, params=None):
@@ -17,7 +30,6 @@ class DataSphereManager():
             raise BadStatusCode(res.status_code, res.text)
         else:
             return res
-
 
     def __make_post_request(self, url, data):
         res = requests.post(url, headers=self.HEADERS, data=json.dumps(data))
@@ -44,19 +56,21 @@ class DataSphereManager():
             print('ID', org['organizationId'])
             print('*' * 25)
 
+    def get_unit_balance(self, project_id):
+        url = "https://datasphere.api.cloud.yandex.net/datasphere/v2/projects/{}:unitBalance".format(project_id)
+        res = self.__make_get_request(url)
+        return res.json()
 
     def get_billing_accounts(self):
         url = "https://billing.api.cloud.yandex.net/billing/v1/billingAccounts"
         res = self.__make_get_request(url)
         return res.json()
 
-
     def get_possible_ds_roles(self):
         url = "https://iam.api.cloud.yandex.net/iam/v1/roles"
         res = self.__make_get_request(url)
         roles = res.json()['roles']
         return [role for role in roles if 'datasphere' in role['id']]
-
 
     def get_organization_members(self, org_id: str):
 
@@ -77,33 +91,26 @@ class DataSphereManager():
         res = self.__make_get_request(url, params)
         return res.json()
 
-
     def create_project(self,
                        community_id: str,
                        name: str,
                        description: str = None,
-                       maxUnitsPerHour: int = None,
-                       maxUnitsPerExecution: int = None,
                        vmInactivityTimeout: str = "1800s"):
         data = ProjectSettings(
             community_id=community_id,
             name=name,
             description=description,
-            maxUnitsPerHour=maxUnitsPerHour,
-            maxUnitsPerExecution=maxUnitsPerExecution,
             vmInactivityTimeout=vmInactivityTimeout
         ).to_dict()
         url = "https://datasphere.api.cloud.yandex.net/datasphere/v2/projects"
         res = self.__make_post_request(url, data)
         return res.json()
 
-
     def check_operation_status(self, id_operation: str):
         url = "https://operation.api.cloud.yandex.net/operations/{}".format(id_operation)
         res = self.__make_get_request(url)
         return res.json()
 
-    
     def get_projects(self, project_id: str = None, community_id: str = None, parse_projects_flag=False):
         if (community_id and project_id) or (
                 (not project_id) and (not community_id)
@@ -123,7 +130,6 @@ class DataSphereManager():
             return parse_projects(res.json())
         else:
             return res.json()
-
 
     def add_contributors(self, project_id, contributors: list[dict]):
         """
@@ -145,8 +151,7 @@ class DataSphereManager():
         if not contributors:
             return 'No participants selected'
         else:
-            data = {}
-            data['accessBindings'] = []
+            data = {'accessBindings': []}
 
             for user in contributors:
                 data['accessBindings'].append({
@@ -161,32 +166,39 @@ class DataSphereManager():
 
         res = self.__make_post_request(url, data)
         return res.json()
-    
+
+    def update_unit_balance(self, project_id, new_unit_balance):
+        url = "https://datasphere.api.cloud.yandex.net/datasphere/v2/projects/{}:unitBalance".format(project_id)
+        data = {"unitBalance": new_unit_balance}
+        res = self.__make_post_request(url, data)
+        return res.json()
+
     def update_all_community_projects(self,
-                       community_id: str,
-                       maxUnitsPerHour: int = 100,
-                       maxUnitsPerExecution: int = 1000,
-                       vmInactivityTimeout: str = "1000s"):
+                                      community_id: str,
+                                      vmInactivityTimeout: str = "1000s",
+                                      unit_balance: int = None):
         data = ProjectSettings(
-            maxUnitsPerHour=maxUnitsPerHour,
-            maxUnitsPerExecution=maxUnitsPerExecution,
             vmInactivityTimeout=vmInactivityTimeout
         ).to_dict()
 
         projects = self.get_projects(community_id=community_id)
 
         updateMask_list = []
-        for k,v in data.items():
+        for k, v in data.items():
             for n in v.keys():
                 updateMask_list.append(f"{k}.{n}")
         data['updateMask'] = ', '.join(updateMask_list)
-        
+
         try:
             for idx, project in enumerate(projects['projects']):
-                print(f"{idx+1}/{len(projects['projects'])}")
+                print(f"{idx + 1}/{len(projects['projects'])}")
                 url = "https://datasphere.api.cloud.yandex.net/datasphere/v2/projects/{}".format(project.get('id'))
                 res = self.__make_patch_request(url, data)
                 print('Operation id:', res.json()['id'])
+
+                if unit_balance is not None:
+                    self.update_unit_balance(project.get('id'), unit_balance)
+
             return 'ok'
         except Exception as e:
-            raise(e)
+            raise e
