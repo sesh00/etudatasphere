@@ -30,6 +30,12 @@ setup(
     packages=['etudatasphere'],
     install_requires=['requests'],
 
+    extras_require={
+            'dev': [
+                'pytest',
+            ]
+        },
+
     classifiers=[
         'Operating System :: OS Independent',
         'Intended Audience :: End Users/Desktop',

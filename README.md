@@ -1,4 +1,4 @@
-# EtuDataSphere v1
+# EtuDataSphere 
 
 ![PyPI](https://img.shields.io/pypi/v/etudatasphere?color=orange) ![Python 3.6, 3.7, 3.8](https://img.shields.io/pypi/pyversions/etudatasphere?color=blueviolet) ![GitHub Pull Requests](https://img.shields.io/github/issues-pr/sesh00/etudatasphere?color=blueviolet) ![License](https://img.shields.io/pypi/l/d?color=blueviolet) 
 
@@ -69,8 +69,6 @@ dataSphereManager.create_project(
                         community_id = community_id,
                         name = name,
                         description = description,
-                        maxUnitsPerHour = maxUnitsPerHour,
-                        maxUnitsPerExecution = maxUnitsPerExecution,
                         vmInactivityTimeout = vmInactivityTimeout)
 ```
 ### Operation Status Check
@@ -107,3 +105,13 @@ contributors = [
 dataSphereManager.add_contributors(project_id=project_id, contributors=contributors)
 
 ```
+
+## Contributing
+
+Contributions to EtuDataSphere are welcome! If you find any issues or have suggestions for improvements, please feel free to open an issue or submit a pull request on the GitHub repository
+
+
+## License
+
+The module is available as open source under the terms of the [MIT License](https://opensource.org/licenses/mit)
+

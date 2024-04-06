@@ -1,5 +1,6 @@
 import traceback
 
+
 def handle_exceptions(func):
     def wrapper(*args, **kwargs):
         try:

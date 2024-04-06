@@ -25,27 +25,22 @@ def parse_settings(project_settings: dict):
     for el in project_settings:
         settings_str += f"\t{el}:{project_settings[el]}\n"
     return settings_str
-        
-class ProjectSettings():
+
+
+class ProjectSettings:
     settings = ('vmInactivityTimeout')
     limits = ('maxUnitsPerHour', 'maxUnitsPerExecution')
 
     def __init__(self, community_id: str = None,
                  name: str = None,
-                 maxUnitsPerHour: int = None,
-                 maxUnitsPerExecution: int = None,
                  description: str = None,
-                 vmInactivityTimeout: str = "300s") -> dict:
+                 vmInactivityTimeout: str = "300s"):
         if community_id:
             self.community_id = community_id
         if name:
             self.name = name
         if description:
             self.description = description
-        if maxUnitsPerHour:
-            self.maxUnitsPerHour = maxUnitsPerHour
-        if maxUnitsPerExecution:
-            self.maxUnitsPerExecution = maxUnitsPerExecution
         if vmInactivityTimeout:
             self.vmInactivityTimeout = vmInactivityTimeout
 
