@@ -46,4 +46,4 @@ def test_update_all_community_projects(data_sphere_manager):
     community_id = "bt1u8sr3l01444sc22gm"
     vm_inactivity_timeout = "666s"
     unit_balance = 150
-    result = data_sphere_manager.update_all_community_projects(community_id, vm_inactivity_timeout, unit_balance)
+    data_sphere_manager.update_all_community_projects(community_id, vm_inactivity_timeout, unit_balance)

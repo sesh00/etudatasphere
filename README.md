@@ -61,9 +61,7 @@ Creates a project, adds contributors, and configures settings.
 community_id = "" # From the section with the request for communities
 name = "" # Project name
 description = "" # Project description
-maxUnitsPerHour = None # Limits on the usage of units per hour
-maxUnitsPerExecution = None # Limits on the usage of units per execution
-vmInactivityTimeout = "300s" # Release resources in the specified format, where 300 is the number of seconds of inactivity
+vmInactivityTimeout = "100s" # Release resources in the specified format, where 300 is the number of seconds of inactivity
 
 dataSphereManager.create_project(
                         community_id = community_id,
@@ -104,6 +102,22 @@ contributors = [
 
 dataSphereManager.add_contributors(project_id=project_id, contributors=contributors)
 
+```
+
+### Update all community projects
+```python
+community_id = ""
+vm_inactivity_timeout = "100s"
+unit_balance = 100
+dataSphereManager.update_all_community_projects(community_id, vm_inactivity_timeout, unit_balance)
+```
+
+### Get & Update unit balance
+```python
+project_id = ""
+unit_balance = 100
+print(dataSphereManager.get_unit_balance(project_id))
+dataSphereManager.update_unit_balance(project_id, unit_balance)
 ```
 
 ## Contributing
