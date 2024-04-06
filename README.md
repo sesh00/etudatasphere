@@ -9,7 +9,7 @@ This is a Python library for interacting with Yandex DataSphere API. It provides
 Install the current version with [PyPI](https://pypi.org/project/etudatasphere):
 
 ```bash
-pip install etudatasphere==0.1.1
+pip install etudatasphere
 ```
 
 Or from GitHub:
