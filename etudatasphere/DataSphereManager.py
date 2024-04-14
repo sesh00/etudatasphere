@@ -188,8 +188,25 @@ class DataSphereManager:
         url = "https://datasphere.api.cloud.yandex.net/datasphere/v2/projects/{}".format(
             project_id if project_id else "")
         res = self.__make_get_request(url, params)
+
         if parse_projects_flag:
-            return parse_projects(res.json())
+            res_json = res.json()
+            unit_balances = {}
+
+            if res_json.get('projects'):
+                for project in res_json.get('projects'):
+                    project_id = project.get('id')
+                    unit_balance_res = self.get_unit_balance(project_id)
+                    unit_balance = unit_balance_res.get('unitBalance')
+                    unit_balances[project_id] = unit_balance
+            else:
+                project_id = res_json.get('id')
+                unit_balance_res = self.get_unit_balance(project_id)
+                unit_balance = unit_balance_res.get('unitBalance')
+                unit_balances[project_id] = unit_balance
+
+            return parse_projects(res_json, unit_balances)
+
         else:
             return res.json()
 
