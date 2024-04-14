@@ -5,6 +5,10 @@ from etudatasphere.utils import parse_projects, ProjectSettings
 
 
 def request_iam_token(oauth_token):
+    """
+    Requests an IAM token from Yandex Cloud IAM API using the provided OAuth token.
+    """
+
     url = "https://iam.api.cloud.yandex.net/iam/v1/tokens"
     headers = {"Authorization": f"OAuth {oauth_token}"}
     payload = {"yandexPassportOauthToken": oauth_token}
@@ -19,8 +23,14 @@ def request_iam_token(oauth_token):
 
 
 class DataSphereManager:
+    """
+    Class for managing interactions with Yandex DataSphere API.
+    """
 
     def __init__(self, oauth_token: str) -> None:
+        """
+        Initializes DataSphereManager object with the provided OAuth token.
+        """
         iam_token = request_iam_token(oauth_token)
         self.HEADERS = {"Authorization": "Bearer {}".format(iam_token)}
 
@@ -46,9 +56,9 @@ class DataSphereManager:
             return res
 
     def get_organizations(self):
-        '''
-        Print a list of organizations avialable for the account
-        '''
+        """
+        Retrieves a list of organizations available for the account and prints their titles and IDs.
+        """
         
         url = "https://organization-manager.api.cloud.yandex.net/organization-manager/v1/organizations"
         res = self.__make_get_request(url)
@@ -60,12 +70,11 @@ class DataSphereManager:
             print('*' * 25)
     
     def get_clouds(self, organization_id: str = ''):
-        '''
+        """
+        Prints a list of clouds in organization, if organization_id is
+        not provided prints a list of all clouds in all organizations available for the account
         organization_id: str - ID of organization
-        
-        Print a list of clouds in organization\n 
-        If organization_id not specified print a list of all clouds in all organizations avialable for the account
-        '''
+        """
         
         if organization_id:
             params = {
@@ -85,23 +94,34 @@ class DataSphereManager:
             print('*' * 25)
 
     def get_unit_balance(self, project_id):
+        """
+        Retrieves the unit balance for the specified project.
+        """
         url = "https://datasphere.api.cloud.yandex.net/datasphere/v2/projects/{}:unitBalance".format(project_id)
         res = self.__make_get_request(url)
         return res.json()
 
     def get_billing_accounts(self):
+        """
+        Retrieves a list of billing accounts.
+        """
         url = "https://billing.api.cloud.yandex.net/billing/v1/billingAccounts"
         res = self.__make_get_request(url)
         return res.json()
 
     def get_possible_ds_roles(self):
+        """
+        Retrieves a list of possible roles in DataSphere.
+        """
         url = "https://iam.api.cloud.yandex.net/iam/v1/roles"
         res = self.__make_get_request(url)
         roles = res.json()['roles']
         return [role for role in roles if 'datasphere' in role['id']]
 
     def get_organization_members(self, org_id: str):
-
+        """
+        Retrieves members of the specified organization and prints their names and IDs.
+        """
         url = "https://organization-manager.api.cloud.yandex.net/organization-manager/v1/organizations/{}/users".format(
             org_id)
         res = self.__make_get_request(url)
@@ -112,6 +132,9 @@ class DataSphereManager:
             print('*' * 25)
 
     def get_organization_communities(self, organization_id: str):
+        """
+        Retrieves communities of the specified organization.
+        """
         url = "https://datasphere.api.cloud.yandex.net/datasphere/v2/communities"
         params = {
             "organizationId": organization_id
@@ -119,11 +142,11 @@ class DataSphereManager:
         res = self.__make_get_request(url, params)
         return res.json()
 
-    def create_project(self,
-                       community_id: str,
-                       name: str,
-                       description: str = None,
-                       vmInactivityTimeout: str = "1800s"):
+    def create_project(self, community_id: str, name: str,
+                       description: str = None, vmInactivityTimeout: str = "1800s"):
+        """
+        Creates a project with the specified parameters.
+        """
         data = ProjectSettings(
             community_id=community_id,
             name=name,
@@ -135,11 +158,17 @@ class DataSphereManager:
         return res.json()
 
     def check_operation_status(self, id_operation: str):
+        """
+        Checks the status of the specified operation.
+        """
         url = "https://operation.api.cloud.yandex.net/operations/{}".format(id_operation)
         res = self.__make_get_request(url)
         return res.json()
 
     def get_projects(self, project_id: str = None, community_id: str = None, parse_projects_flag=False):
+        """
+        Retrieves information about projects based on project_id or community_id.
+        """
         if (community_id and project_id) or (
                 (not project_id) and (not community_id)
         ):
@@ -161,6 +190,8 @@ class DataSphereManager:
 
     def add_contributors(self, project_id, contributors: list[dict]):
         """
+        Adds contributors to the specified project.
+
         project_id: str - ID of project
         contributors: list[dict] - The list of contributors to add
             format:
@@ -196,15 +227,19 @@ class DataSphereManager:
         return res.json()
 
     def update_unit_balance(self, project_id, new_unit_balance):
+        """
+        Updates the unit balance for the specified project.
+        """
         url = "https://datasphere.api.cloud.yandex.net/datasphere/v2/projects/{}:unitBalance".format(project_id)
         data = {"unitBalance": new_unit_balance}
         res = self.__make_post_request(url, data)
         return res.json()
 
-    def update_all_community_projects(self,
-                                      community_id: str,
-                                      vmInactivityTimeout: str = "1000s",
-                                      unit_balance: int = None):
+    def update_all_community_projects(self, community_id: str,
+                                      vmInactivityTimeout: str = "1000s", unit_balance: int = None):
+        """
+        Updates settings for all projects in the specified community.
+        """
         data = ProjectSettings(
             vmInactivityTimeout=vmInactivityTimeout
         ).to_dict()
