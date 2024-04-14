@@ -46,14 +46,42 @@ class DataSphereManager:
             return res
 
     def get_organizations(self):
-
-        url = "https://resource-manager.api.cloud.yandex.net/resource-manager/v1/clouds"
+        '''
+        Print a list of organizations avialable for the account
+        '''
+        
+        url = "https://organization-manager.api.cloud.yandex.net/organization-manager/v1/organizations"
         res = self.__make_get_request(url)
-        orgs = res.json()['clouds']
+        orgs = res.json()['organizations']
 
         for org in orgs:
-            print('NAME', org['name'])
-            print('ID', org['organizationId'])
+            print('TITLE', org['title'])
+            print('ID', org['id'])
+            print('*' * 25)
+    
+    def get_clouds(self, organization_id: str = ''):
+        '''
+        organization_id: str - ID of organization
+        
+        Print a list of clouds in organization\n 
+        If organization_id not specified print a list of all clouds in all organizations avialable for the account
+        '''
+        
+        if organization_id:
+            params = {
+                "organizationId": organization_id
+            }
+        else:
+            params = None
+                
+        url = "https://resource-manager.api.cloud.yandex.net/resource-manager/v1/clouds"
+        res = self.__make_get_request(url, params)
+        clouds = res.json()['clouds']
+        
+        for cloud in clouds:
+            print('NAME', cloud['name'])
+            print('CLOUD_ID', cloud['id'])
+            print('ORGANIZATION_ID', cloud['organizationId'])
             print('*' * 25)
 
     def get_unit_balance(self, project_id):
