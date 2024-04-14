@@ -1,26 +1,28 @@
 import pytest
+import os
 from etudatasphere import DataSphereManager
 
 
 @pytest.fixture(scope="module")
 def data_sphere_manager():
-    data_sphere_manager = DataSphereManager(oauth_token="")
+    oauth_token = os.environ.get("OAUTH_TOKEN")
+    data_sphere_manager = DataSphereManager(oauth_token=oauth_token)
     return data_sphere_manager
 
 
 def test_get_organizations(data_sphere_manager):
-    organizations = data_sphere_manager.get_organizations()
+    data_sphere_manager.get_organizations()
 
 
 def test_get_communities(data_sphere_manager):
     organization_id = "bpfa94oocmi345p7tpv7"
-    communities = data_sphere_manager.get_organization_communities(organization_id)
+    communities = data_sphere_manager.get_organization_communities(organization_id, parse_communities_flag=True)
     print(communities)
 
 
 def test_get_projects(data_sphere_manager):
     community_id = "bt1u8sr3l01444sc22gm"
-    projects = data_sphere_manager.get_projects(community_id=community_id)
+    projects = data_sphere_manager.get_projects(community_id=community_id, parse_projects_flag=True)
     print(projects)
 
 

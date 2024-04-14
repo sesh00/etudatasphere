@@ -20,6 +20,20 @@ Project settings:\n
         """
 
 
+def parse_communities(res: dict):
+    parse_str = """"""
+
+    for community in res.get('communities'):
+        parse_str = parse_str + f"""
+Community Id: {community.get('id')}\n
+Community Name: {community.get('name')}\n
+Community CreatedById: {community.get('createdById')}\n
+Community OrganizationId: {community.get('organizationId')}\n
+***********************************************
+        """
+    return parse_str
+
+
 def parse_settings(project_settings: dict):
     settings_str = ""
     for el in project_settings:

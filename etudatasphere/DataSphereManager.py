@@ -1,7 +1,7 @@
-import requests
 import json
+import requests
 from etudatasphere.exceptions import BadProjectRequest, BadStatusCode
-from etudatasphere.utils import parse_projects, ProjectSettings
+from etudatasphere.utils import parse_projects, ProjectSettings, parse_communities
 
 
 def request_iam_token(oauth_token):
@@ -131,7 +131,7 @@ class DataSphereManager:
             print('ID', user['subjectClaims']['sub'])
             print('*' * 25)
 
-    def get_organization_communities(self, organization_id: str):
+    def get_organization_communities(self, organization_id: str, parse_communities_flag=False):
         """
         Retrieves communities of the specified organization.
         """
@@ -140,7 +140,11 @@ class DataSphereManager:
             "organizationId": organization_id
         }
         res = self.__make_get_request(url, params)
-        return res.json()
+
+        if parse_communities_flag:
+            return parse_communities(res.json())
+        else:
+            return res.json()
 
     def create_project(self, community_id: str, name: str,
                        description: str = None, vmInactivityTimeout: str = "1800s"):
@@ -180,6 +184,7 @@ class DataSphereManager:
             }
         else:
             params = None
+
         url = "https://datasphere.api.cloud.yandex.net/datasphere/v2/projects/{}".format(
             project_id if project_id else "")
         res = self.__make_get_request(url, params)
