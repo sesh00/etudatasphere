@@ -2,6 +2,5 @@
 /dist/
 /etudataproc.egg-info/
 **venv
-test.ipynb
 **__pycache__
 /.pytest_cache/

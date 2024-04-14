@@ -1,0 +1,5 @@
+pytest~=8.1.1
+etudatasphere~=0.1.1
+setuptools~=69.2.0
+requests~=2.31.0
+nbformat~=5.10.4
