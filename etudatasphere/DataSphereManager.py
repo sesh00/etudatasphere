@@ -1,6 +1,6 @@
 import json
 import requests
-from etudatasphere.exceptions import BadProjectRequest, BadStatusCode
+from etudatasphere.exceptions import BadProjectRequest, BadStatusCode, BadUpdateAllProjects, BadAddContributors
 from etudatasphere.utils import parse_projects, ProjectSettings, parse_communities
 
 
@@ -230,7 +230,7 @@ class DataSphereManager:
         """
 
         if not contributors:
-            return 'No participants selected'
+            raise BadAddContributors()
         else:
             data = {'accessBindings': []}
 
@@ -286,4 +286,4 @@ class DataSphereManager:
 
             return 'ok'
         except Exception as e:
-            raise e
+            raise BadUpdateAllProjects(str(e))
