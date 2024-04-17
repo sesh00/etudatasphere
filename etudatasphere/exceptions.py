@@ -1,17 +1,6 @@
 import traceback
 
 
-def handle_exceptions(func):
-    def wrapper(*args, **kwargs):
-        try:
-            return func(*args, **kwargs)
-        except Exception as e:
-            print(f"Exception occurred: {e}")
-            print(f"Exception {traceback.format_exc()}")
-
-    return wrapper
-
-
 class BadStatusCode(Exception):
     def __init__(self, status_code, text="Error", message="Bad request"):
         self.status_code = status_code

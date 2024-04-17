@@ -12,24 +12,8 @@ from etudatasphere.utils import (
     CommunitySettings,
     parse_communities,
 )
-
-
-def request_iam_token(oauth_token):
-    """
-    Requests an IAM token from Yandex Cloud IAM API using the provided OAuth token.
-    """
-
-    url = "https://iam.api.cloud.yandex.net/iam/v1/tokens"
-    headers = {"Authorization": f"OAuth {oauth_token}"}
-    payload = {"yandexPassportOauthToken": oauth_token}
-
-    res = requests.post(url, headers=headers, json=payload)
-
-    if res.status_code != 200:
-        raise BadStatusCode(res.status_code, res.text)
-    else:
-        response_json = res.json()
-        return response_json.get("iamToken")
+from etudatasphere.requests import RequestController
+from etudatasphere.OperationManager import OperationManager
 
 
 class DataSphereManager:
@@ -41,30 +25,7 @@ class DataSphereManager:
         """
         Initializes DataSphereManager object with the provided OAuth token.
         """
-        iam_token = request_iam_token(oauth_token)
-        self.HEADERS = {"Authorization": "Bearer {}".format(iam_token)}
-
-    def __make_get_request(self, url, params=None):
-        res = requests.get(url, headers=self.HEADERS, params=params)
-        if res.status_code != 200:
-            raise BadStatusCode(res.status_code, res.text)
-        else:
-            return res
-
-    def __make_post_request(self, url, data):
-        res = requests.post(url, headers=self.HEADERS, data=json.dumps(data))
-        if res.status_code != 200:
-            print(data)
-            raise BadStatusCode(res.status_code, res.text)
-        else:
-            return res
-
-    def __make_patch_request(self, url, data):
-        res = requests.patch(url, headers=self.HEADERS, data=json.dumps(data))
-        if res.status_code != 200:
-            raise BadStatusCode(res.status_code, res.text)
-        else:
-            return res
+        self.rc = RequestController(oauth_token=oauth_token)
 
     def get_organizations(self):
         """
@@ -72,7 +33,7 @@ class DataSphereManager:
         """
 
         url = "https://organization-manager.api.cloud.yandex.net/organization-manager/v1/organizations"
-        res = self.__make_get_request(url)
+        res = self.rc.make_get_request(url)
         orgs = res.json()["organizations"]
 
         for org in orgs:
@@ -93,7 +54,7 @@ class DataSphereManager:
             params = None
 
         url = "https://resource-manager.api.cloud.yandex.net/resource-manager/v1/clouds"
-        res = self.__make_get_request(url, params)
+        res = self.rc.make_get_request(url, params)
         clouds = res.json()["clouds"]
 
         for cloud in clouds:
@@ -109,7 +70,7 @@ class DataSphereManager:
         url = "https://datasphere.api.cloud.yandex.net/datasphere/v2/projects/{}:unitBalance".format(
             project_id
         )
-        res = self.__make_get_request(url)
+        res = self.rc.make_get_request(url)
         return res.json()
 
     def get_billing_accounts(self):
@@ -117,7 +78,7 @@ class DataSphereManager:
         Retrieves a list of billing accounts.
         """
         url = "https://billing.api.cloud.yandex.net/billing/v1/billingAccounts"
-        res = self.__make_get_request(url)
+        res = self.rc.make_get_request(url)
         return res.json()
 
     def get_possible_ds_roles(self):
@@ -125,7 +86,7 @@ class DataSphereManager:
         Retrieves a list of possible roles in DataSphere.
         """
         url = "https://iam.api.cloud.yandex.net/iam/v1/roles"
-        res = self.__make_get_request(url)
+        res = self.rc.make_get_request(url)
         roles = res.json()["roles"]
         return [role for role in roles if "datasphere" in role["id"]]
 
@@ -136,7 +97,7 @@ class DataSphereManager:
         url = "https://organization-manager.api.cloud.yandex.net/organization-manager/v1/organizations/{}/users".format(
             org_id
         )
-        res = self.__make_get_request(url)
+        res = self.rc.make_get_request(url)
         users = res.json()["users"]
         for user in users:
             print("NAME", user["subjectClaims"]["name"])
@@ -151,7 +112,7 @@ class DataSphereManager:
         """
         url = "https://datasphere.api.cloud.yandex.net/datasphere/v2/communities"
         params = {"organizationId": organization_id}
-        res = self.__make_get_request(url, params)
+        res = self.rc.make_get_request(url, params)
 
         if parse_communities_flag:
             return parse_communities(res.json())
@@ -175,18 +136,16 @@ class DataSphereManager:
             vmInactivityTimeout=vmInactivityTimeout,
         ).to_dict()
         url = "https://datasphere.api.cloud.yandex.net/datasphere/v2/projects"
-        res = self.__make_post_request(url, data)
+        res = self.rc.make_post_request(url, data)
         return res.json()
 
-    def check_operation_status(self, id_operation: str):
-        """
-        Checks the status of the specified operation.
-        """
-        url = "https://operation.api.cloud.yandex.net/operations/{}".format(
-            id_operation
-        )
-        res = self.__make_get_request(url)
-        return res.json()
+    def get_community(self, community_id: str = None):
+        if community_id:
+            url = "https://datasphere.api.cloud.yandex.net/datasphere/v2/communities/{}".format(
+                community_id
+            )
+            res = self.rc.make_get_request(url)
+            return res.json()
 
     def get_projects(
         self,
@@ -210,7 +169,7 @@ class DataSphereManager:
                 project_id if project_id else ""
             )
         )
-        res = self.__make_get_request(url, params)
+        res = self.rc.make_get_request(url)
 
         if parse_projects_flag:
             res_json = res.json()
@@ -268,7 +227,7 @@ class DataSphereManager:
             project_id
         )
 
-        res = self.__make_post_request(url, data)
+        res = self.rc.make_post_request(url, data)
         return res.json()
 
     def update_unit_balance(self, project_id, new_unit_balance):
@@ -279,7 +238,7 @@ class DataSphereManager:
             project_id
         )
         data = {"unitBalance": new_unit_balance}
-        res = self.__make_post_request(url, data)
+        res = self.rc.make_post_request(url, data)
         return res.json()
 
     def update_all_community_projects(
@@ -307,7 +266,7 @@ class DataSphereManager:
                 url = "https://datasphere.api.cloud.yandex.net/datasphere/v2/projects/{}".format(
                     project.get("id")
                 )
-                res = self.__make_patch_request(url, data)
+                res = self.rc.make_patch_request(url, data)
                 print("Operation id:", res.json()["id"])
 
                 if unit_balance is not None:
@@ -331,5 +290,5 @@ class DataSphereManager:
             description=description,
             billingAccountId=billingAccountId,
         ).to_dict()
-        res = self.__make_post_request(url, data)
+        res = self.rc.make_post_request(url, data)
         return res.json()
