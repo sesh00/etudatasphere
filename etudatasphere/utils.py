@@ -1,9 +1,11 @@
 def parse_projects(res: dict, unit_balances: dict):
 
-    if res.get('projects'):
+    if res.get("projects"):
         parse_str = """"""
-        for project in res.get('projects'):
-            parse_str = parse_str + f"""
+        for project in res.get("projects"):
+            parse_str = (
+                parse_str
+                + f"""
 Project name: {project.get('name')}\n
 Project ID: {project.get('id')}\n
 Project settings:\n
@@ -11,6 +13,7 @@ Project settings:\n
 Project unit balance: {unit_balances.get(project.get('id'), 'undefined')}\n
 ***********************************************
         """
+            )
         return parse_str
     else:
         return f"""
@@ -26,14 +29,17 @@ Project unit balance: {unit_balances.get(res.get('id'), 'undefined')}\n
 def parse_communities(res: dict):
     parse_str = """"""
 
-    for community in res.get('communities'):
-        parse_str = parse_str + f"""
+    for community in res.get("communities"):
+        parse_str = (
+            parse_str
+            + f"""
 Community Id: {community.get('id')}\n
 Community Name: {community.get('name')}\n
 Community CreatedById: {community.get('createdById')}\n
 Community OrganizationId: {community.get('organizationId')}\n
 ***********************************************
         """
+        )
     return parse_str
 
 
@@ -44,14 +50,31 @@ def parse_settings(project_settings: dict):
     return settings_str
 
 
-class ProjectSettings:
-    settings = ('vmInactivityTimeout')
-    limits = ('maxUnitsPerHour', 'maxUnitsPerExecution')
+class BaseSettings:
+    def __init__(self, **kwargs) -> None:
+        for key, value in kwargs.items():
+            if value is not None:
+                setattr(self, key, value)
 
-    def __init__(self, community_id: str = None,
-                 name: str = None,
-                 description: str = None,
-                 vmInactivityTimeout: str = "300s"):
+    def to_dict(self):
+        base_dict = {}
+        for key, value in self.__dict__.items():
+            if not (key.startswith("_") or key.endswith("__") or callable(key)):
+                base_dict[key] = value
+        return base_dict
+
+
+class ProjectSettings(BaseSettings):
+    settings = "vmInactivityTimeout"
+    limits = ("maxUnitsPerHour", "maxUnitsPerExecution")
+
+    def __init__(
+        self,
+        community_id: str = None,
+        name: str = None,
+        description: str = None,
+        vmInactivityTimeout: str = "300s",
+    ):
         if community_id:
             self.community_id = community_id
         if name:
@@ -66,8 +89,7 @@ class ProjectSettings:
         settings_dict = {}
         limits_dict = {}
         for key, value in self.__dict__.items():
-            if not (key.startswith('_') or key.endswith('__') or callable(
-                    key)):
+            if not (key.startswith("_") or key.endswith("__") or callable(key)):
                 if key in self.settings:
                     settings_dict[key] = value
                 elif key in self.limits:
@@ -75,7 +97,13 @@ class ProjectSettings:
                 else:
                     base_dict[key] = value
         if settings_dict:
-            base_dict['settings'] = settings_dict
+            base_dict["settings"] = settings_dict
         if limits_dict:
-            base_dict['limits'] = limits_dict
+            base_dict["limits"] = limits_dict
         return base_dict
+
+
+class CommunitySettings(BaseSettings):
+    def __init__(self, **kwargs) -> None:
+
+        super().__init__(**kwargs)
