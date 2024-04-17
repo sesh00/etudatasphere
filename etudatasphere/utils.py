@@ -1,4 +1,4 @@
-def parse_projects(res: dict, unit_balances: dict):
+def parse_projects(res: dict):
 
     if res.get("projects"):
         parse_str = """"""
@@ -10,20 +10,20 @@ Project name: {project.get('name')}\n
 Project ID: {project.get('id')}\n
 Project settings:\n
 {parse_settings(project.get('settings'))}\n
-Project unit balance: {unit_balances.get(project.get('id'), 'undefined')}\n
 ***********************************************
         """
             )
-        return parse_str
+        print(parse_str)
     else:
-        return f"""
+        print(
+            f"""
 Project name: {res.get('name')}\n
 Project ID: {res.get('id')}\n
 Project settings:\n
 {parse_settings(res.get('settings'))}\n
-Project unit balance: {unit_balances.get(res.get('id'), 'undefined')}\n
 ***********************************************
         """
+        )
 
 
 def parse_communities(res: dict):

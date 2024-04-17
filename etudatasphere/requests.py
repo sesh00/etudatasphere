@@ -27,7 +27,7 @@ class RequestController:
             return res
 
     def make_patch_request(self, url, data):
-        res = requests.patch(url, headers=self.HEADERS, data=json.dumps(data))
+        res = requests.patch(url, headers=self.__BASE_HEADERS, data=json.dumps(data))
         if res.status_code != 200:
             raise BadStatusCode(res.status_code, res.text)
         else:

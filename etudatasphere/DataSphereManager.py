@@ -152,6 +152,7 @@ class DataSphereManager:
         project_id: str = None,
         community_id: str = None,
         parse_projects_flag=False,
+        default_values: dict = None,
     ):
         """
         Retrieves information about projects based on project_id or community_id.
@@ -170,27 +171,48 @@ class DataSphereManager:
             )
         )
         res = self.rc.make_get_request(url, params=params)
-
-        if parse_projects_flag:
-            res_json = res.json()
-            unit_balances = {}
-
-            if res_json.get("projects"):
-                for project in res_json.get("projects"):
-                    project_id = project.get("id")
-                    unit_balance_res = self.get_unit_balance(project_id)
-                    unit_balance = unit_balance_res.get("unitBalance")
-                    unit_balances[project_id] = unit_balance
-            else:
-                project_id = res_json.get("id")
-                unit_balance_res = self.get_unit_balance(project_id)
-                unit_balance = unit_balance_res.get("unitBalance")
-                unit_balances[project_id] = unit_balance
-
-            return parse_projects(res_json, unit_balances)
+        res_json = res.json()
+        bad_projects_ids = {}
+        if res_json.get("projects"):
+            for project in res_json.get("projects"):
+                project["settings"]["unit_balance"] = int(
+                    self.get_unit_balance(project.get("id")).get("unitBalance")
+                )
+                if default_values:
+                    problems = {}
+                    for k, v in default_values.items():
+                        if v != project.get("settings").get(k):
+                            problems[k] = {
+                                "default": v,
+                                "current": project.get("settings").get(k),
+                            }
+                        if problems:
+                            bad_projects_ids[project["id"]] = problems
 
         else:
-            return res.json()
+            res_json["settings"]["unit_balance"] = int(
+                self.get_unit_balance(project_id).get("unitBalance")
+            )
+            if default_values:
+                problems = {}
+                for k, v in default_values.items():
+                    if v != res_json.get("settings").get(k):
+                        problems[k] = {
+                            "default": v,
+                            "current": project.get("settings").get(k),
+                        }
+                    if problems:
+                        bad_projects_ids[res_json["id"]] = problems
+
+        if parse_projects_flag:
+            parse_projects(res_json)
+        if default_values:
+            if len(bad_projects_ids) > 0:
+                return bad_projects_ids, res_json
+            else:
+                return "All projects include default settings", res_json
+        else:
+            return res_json
 
     def add_contributors(self, project_id, contributors: list[dict]):
         """
@@ -253,7 +275,7 @@ class DataSphereManager:
         data = ProjectSettings(vmInactivityTimeout=vmInactivityTimeout).to_dict()
 
         projects = self.get_projects(community_id=community_id)
-
+        print(projects)
         updateMask_list = []
         for k, v in data.items():
             for n in v.keys():
