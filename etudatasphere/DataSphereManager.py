@@ -169,7 +169,7 @@ class DataSphereManager:
                 project_id if project_id else ""
             )
         )
-        res = self.rc.make_get_request(url)
+        res = self.rc.make_get_request(url, params=params)
 
         if parse_projects_flag:
             res_json = res.json()
