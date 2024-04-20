@@ -1,8 +1,5 @@
-import json
-import requests
 from etudatasphere.exceptions import (
     BadProjectRequest,
-    BadStatusCode,
     BadUpdateAllProjects,
     BadAddContributors,
 )
@@ -13,7 +10,6 @@ from etudatasphere.utils import (
     parse_communities,
 )
 from etudatasphere.requests import RequestController
-from etudatasphere.OperationManager import OperationManager
 
 
 class DataSphereManager:
@@ -105,7 +101,7 @@ class DataSphereManager:
             print("*" * 25)
 
     def get_organization_communities(
-        self, organization_id: str, parse_communities_flag=False
+            self, organization_id: str, parse_communities_flag=False
     ):
         """
         Retrieves communities of the specified organization.
@@ -120,11 +116,11 @@ class DataSphereManager:
             return res.json()
 
     def create_project(
-        self,
-        community_id: str,
-        name: str,
-        description: str = None,
-        vmInactivityTimeout: str = "1800s",
+            self,
+            community_id: str,
+            name: str,
+            description: str = None,
+            vmInactivityTimeout: str = "1800s",
     ):
         """
         Creates a project with the specified parameters.
@@ -148,11 +144,11 @@ class DataSphereManager:
             return res.json()
 
     def get_projects(
-        self,
-        project_id: str = None,
-        community_id: str = None,
-        parse_projects_flag=False,
-        default_values: dict = None,
+            self,
+            project_id: str = None,
+            community_id: str = None,
+            parse_projects_flag=False,
+            default_values: dict = None,
     ):
         """
         Retrieves information about projects based on project_id or community_id.
@@ -199,7 +195,7 @@ class DataSphereManager:
                     if v != res_json.get("settings").get(k):
                         problems[k] = {
                             "default": v,
-                            "current": project.get("settings").get(k),
+                            "current": res_json.get("settings").get(k),
                         }
                     if problems:
                         bad_projects_ids[res_json["id"]] = problems
@@ -264,10 +260,10 @@ class DataSphereManager:
         return res.json()
 
     def update_all_community_projects(
-        self,
-        community_id: str,
-        vmInactivityTimeout: str = "1000s",
-        unit_balance: int = None,
+            self,
+            community_id: str,
+            vmInactivityTimeout: str = "1000s",
+            unit_balance: int = None,
     ):
         """
         Updates settings for all projects in the specified community.
@@ -299,11 +295,11 @@ class DataSphereManager:
             raise BadUpdateAllProjects(str(e))
 
     def create_community(
-        self,
-        name: str,
-        description: str,
-        organizationId: str,
-        billingAccountId: str = None,
+            self,
+            name: str,
+            description: str,
+            organizationId: str,
+            billingAccountId: str = None,
     ):
         url = "https://datasphere.api.cloud.yandex.net/datasphere/v2/communities"
         data = CommunitySettings(
